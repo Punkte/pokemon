@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Pokemon, PokemonType } from "./types";
 import AppConfig from "./config";
-import { PokemonFactory } from "./factory/PokemonFactory";
+import { PokemonApiAdapter } from "./adapter/PokemonApiAdapter";
 import { FilterBar } from "./components/FilterBar";
 import { PokemonList } from "./components/PokemonList";
 import { TeamPanel } from "./components/TeamPanel";
@@ -14,20 +14,12 @@ function App() {
   const [selectedType, setSelectedType] = useState<PokemonType | "all">("all");
 
   useEffect(() => {
+    const adapter = new PokemonApiAdapter();
     setLoading(true);
-
-    fetch(`${AppConfig.API_URL}/pokemon?limit=${AppConfig.POKEMON_LIMIT}`)
-      .then((res) => res.json())
-      .then((data) => {
-        const requests = data.results.map((entry: { url: string }) =>
-          fetch(entry.url).then((r) => r.json())
-        );
-
-        Promise.all(requests).then((details) => {
-          setPokemons(details.map(PokemonFactory.create));
-          setLoading(false);
-        });
-      });
+    adapter.fetchAll().then((data) => {
+      setPokemons(data);
+      setLoading(false);
+    });
   }, []);
 
   function handleAdd(pokemon: Pokemon) {
