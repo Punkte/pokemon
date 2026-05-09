@@ -31,6 +31,16 @@ export interface Pokemon {
   };
 }
 
+export interface RawPokemon {
+  id: number;
+  name: string;
+  sprites: {
+    front_default: string;
+  };
+  types: { type: { name: PokemonType } }[];
+  stats: { base_stat: number }[];
+}
+
 export interface TeamSlot {
   pokemon: Pokemon;
 }

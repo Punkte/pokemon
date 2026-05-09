@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Pokemon, PokemonType } from "./types";
 import AppConfig from "./config";
+import { PokemonFactory } from "./factory/PokemonFactory";
 import { FilterBar } from "./components/FilterBar";
 import { PokemonList } from "./components/PokemonList";
 import { TeamPanel } from "./components/TeamPanel";
@@ -23,20 +24,7 @@ function App() {
         );
 
         Promise.all(requests).then((details) => {
-          const parsed: Pokemon[] = details.map((d) => ({
-            id: d.id,
-            name: d.name,
-            sprite: d.sprites.front_default,
-            types: d.types.map((t: { type: { name: string } }) => t.type.name),
-            stats: {
-              hp: d.stats[0].base_stat,
-              attack: d.stats[1].base_stat,
-              defense: d.stats[2].base_stat,
-              speed: d.stats[5].base_stat,
-            },
-          }));
-
-          setPokemons(parsed);
+          setPokemons(details.map(PokemonFactory.create));
           setLoading(false);
         });
       });
