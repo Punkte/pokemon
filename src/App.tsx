@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import type { Pokemon, PokemonType } from "./types";
+import type { PokemonType } from "./types";
+import type { DecoratedPokemon } from "./decorator/pokemonDecorators";
 import AppConfig from "./config";
 import { PokemonApiAdapter } from "./adapter/PokemonApiAdapter";
+import { withPowerLevel, withLegendary } from "./decorator/pokemonDecorators";
 import { FilterBar } from "./components/FilterBar";
 import { PokemonList } from "./components/PokemonList";
 import { TeamPanel } from "./components/TeamPanel";
 
 function App() {
-  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
-  const [team, setTeam] = useState<Pokemon[]>([]);
+  const [pokemons, setPokemons] = useState<DecoratedPokemon[]>([]);
+  const [team, setTeam] = useState<DecoratedPokemon[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState<PokemonType | "all">("all");
@@ -17,12 +19,12 @@ function App() {
     const adapter = new PokemonApiAdapter();
     setLoading(true);
     adapter.fetchAll().then((data) => {
-      setPokemons(data);
+      setPokemons(data.map((p) => withLegendary(withPowerLevel(p))));
       setLoading(false);
     });
   }, []);
 
-  function handleAdd(pokemon: Pokemon) {
+  function handleAdd(pokemon: DecoratedPokemon) {
     if (team.length >= AppConfig.MAX_TEAM_SIZE) return;
     if (team.find((p) => p.id === pokemon.id)) return;
     setTeam([...team, pokemon]);

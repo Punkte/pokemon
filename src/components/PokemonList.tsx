@@ -1,10 +1,10 @@
-import type { Pokemon } from "../types";
+import type { DecoratedPokemon } from "../decorator/pokemonDecorators";
 import { PokemonCard } from "./PokemonCard";
 
 interface PokemonListProps {
-  pokemons: Pokemon[];
+  pokemons: DecoratedPokemon[];
   teamIds: number[];
-  onAdd: (pokemon: Pokemon) => void;
+  onAdd: (pokemon: DecoratedPokemon) => void;
 }
 
 export function PokemonList({ pokemons, teamIds, onAdd }: PokemonListProps) {

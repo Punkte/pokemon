@@ -1,4 +1,4 @@
-import type { Pokemon } from "../types";
+import type { DecoratedPokemon } from "../decorator/pokemonDecorators";
 
 const TYPE_COLORS: Record<string, string> = {
   fire: "bg-orange-100 text-orange-700",
@@ -22,22 +22,26 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 interface PokemonCardProps {
-  pokemon: Pokemon;
-  onAdd: (pokemon: Pokemon) => void;
+  pokemon: DecoratedPokemon;
+  onAdd: (pokemon: DecoratedPokemon) => void;
   isInTeam: boolean;
 }
 
 export function PokemonCard({ pokemon, onAdd, isInTeam }: PokemonCardProps) {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col items-center gap-2 shadow-sm hover:shadow-md transition-shadow">
+    <div className={`bg-white border rounded-xl p-4 flex flex-col items-center gap-2 shadow-sm hover:shadow-md transition-shadow ${pokemon.isLegendary ? "border-yellow-400 ring-1 ring-yellow-300" : "border-gray-200"}`}>
       <img
         src={pokemon.sprite}
         alt={pokemon.name}
         className="w-24 h-24 object-contain"
       />
-      <p className="font-semibold capitalize text-gray-800">
+      <p className="font-semibold capitalize text-gray-800 flex items-center gap-1">
         #{String(pokemon.id).padStart(3, "0")} {pokemon.name}
+        {pokemon.isLegendary && <span title="Légendaire">★</span>}
       </p>
+      {pokemon.powerLevel !== undefined && (
+        <p className="text-xs text-gray-400">Puissance : {pokemon.powerLevel}</p>
+      )}
       <div className="flex gap-1 flex-wrap justify-center">
         {pokemon.types.map((type) => (
           <span
