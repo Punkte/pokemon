@@ -5,6 +5,7 @@ import AppConfig from "./config";
 import { PokemonApiAdapter } from "./adapter/PokemonApiAdapter";
 import { withPowerLevel, withLegendary } from "./decorator/pokemonDecorators";
 import { teamEvents } from "./observer/teamEvents";
+import { ByNameStrategy, ByTypeStrategy, BySortStrategy } from "./strategy/filterStrategies";
 import { FilterBar } from "./components/FilterBar";
 import { PokemonList } from "./components/PokemonList";
 import { TeamPanel } from "./components/TeamPanel";
@@ -16,6 +17,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState<PokemonType | "all">("all");
+  const [sortBy, setSortBy] = useState<"none" | "name" | "hp" | "attack" | "speed">("none");
 
   useEffect(() => {
     const adapter = new PokemonApiAdapter();
@@ -39,11 +41,12 @@ function App() {
     setTeam(team.filter((p) => p.id !== id));
   }
 
-  const filtered = pokemons.filter((p) => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
-    const matchesType = selectedType === "all" || p.types.includes(selectedType);
-    return matchesSearch && matchesType;
-  });
+  const strategies = [
+    new ByNameStrategy(search),
+    new ByTypeStrategy(selectedType),
+    new BySortStrategy(sortBy),
+  ];
+  const filtered = strategies.reduce((acc, strategy) => strategy.apply(acc), pokemons);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -58,6 +61,8 @@ function App() {
             onTypeChange={setSelectedType}
             search={search}
             onSearchChange={setSearch}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
           />
 
           {loading ? (
