@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Pokemon, PokemonType } from "./types";
+import AppConfig from "./config";
 import { FilterBar } from "./components/FilterBar";
 import { PokemonList } from "./components/PokemonList";
 import { TeamPanel } from "./components/TeamPanel";
@@ -14,7 +15,7 @@ function App() {
   useEffect(() => {
     setLoading(true);
 
-    fetch("https://pokeapi.co/api/v2/pokemon?limit=151")
+    fetch(`${AppConfig.API_URL}/pokemon?limit=${AppConfig.POKEMON_LIMIT}`)
       .then((res) => res.json())
       .then((data) => {
         const requests = data.results.map((entry: { url: string }) =>
@@ -42,7 +43,7 @@ function App() {
   }, []);
 
   function handleAdd(pokemon: Pokemon) {
-    if (team.length >= 6) return;
+    if (team.length >= AppConfig.MAX_TEAM_SIZE) return;
     if (team.find((p) => p.id === pokemon.id)) return;
     setTeam([...team, pokemon]);
   }
