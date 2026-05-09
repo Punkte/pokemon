@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { PokemonType } from "./types";
 import type { DecoratedPokemon } from "./decorator/pokemonDecorators";
 import AppConfig from "./config";
@@ -6,6 +6,7 @@ import { PokemonApiAdapter } from "./adapter/PokemonApiAdapter";
 import { withPowerLevel, withLegendary } from "./decorator/pokemonDecorators";
 import { teamEvents } from "./observer/teamEvents";
 import { ByNameStrategy, ByTypeStrategy, BySortStrategy } from "./strategy/filterStrategies";
+import { AddPokemonCommand, RemovePokemonCommand, CommandHistory } from "./command/teamCommands";
 import { FilterBar } from "./components/FilterBar";
 import { PokemonList } from "./components/PokemonList";
 import { TeamPanel } from "./components/TeamPanel";
@@ -18,6 +19,11 @@ function App() {
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState<PokemonType | "all">("all");
   const [sortBy, setSortBy] = useState<"none" | "name" | "hp" | "attack" | "speed">("none");
+  const [canUndo, setCanUndo] = useState(false);
+  const teamRef = useRef<DecoratedPokemon[]>([]);
+  const history = useRef(new CommandHistory());
+
+  useEffect(() => { teamRef.current = team; }, [team]);
 
   useEffect(() => {
     const adapter = new PokemonApiAdapter();
@@ -34,11 +40,20 @@ function App() {
       return;
     }
     if (team.find((p) => p.id === pokemon.id)) return;
-    setTeam([...team, pokemon]);
+    const cmd = new AddPokemonCommand(pokemon, () => teamRef.current, setTeam);
+    history.current.execute(cmd);
+    setCanUndo(history.current.canUndo());
   }
 
   function handleRemove(id: number) {
-    setTeam(team.filter((p) => p.id !== id));
+    const cmd = new RemovePokemonCommand(id, () => teamRef.current, setTeam);
+    history.current.execute(cmd);
+    setCanUndo(history.current.canUndo());
+  }
+
+  function handleUndo() {
+    history.current.undo();
+    setCanUndo(history.current.canUndo());
   }
 
   const strategies = [
@@ -78,7 +93,7 @@ function App() {
           )}
         </div>
 
-        <TeamPanel team={team} onRemove={handleRemove} />
+        <TeamPanel team={team} onRemove={handleRemove} onUndo={handleUndo} canUndo={canUndo} />
       </main>
       <Notification />
     </div>

@@ -1,13 +1,15 @@
-import type { Pokemon } from "../types";
+import type { DecoratedPokemon } from "../decorator/pokemonDecorators";
 
 interface TeamPanelProps {
-  team: Pokemon[];
+  team: DecoratedPokemon[];
   onRemove: (id: number) => void;
+  onUndo: () => void;
+  canUndo: boolean;
 }
 
 const MAX_TEAM_SIZE = 6;
 
-export function TeamPanel({ team, onRemove }: TeamPanelProps) {
+export function TeamPanel({ team, onRemove, onUndo, canUndo }: TeamPanelProps) {
   const slots = Array.from({ length: MAX_TEAM_SIZE });
 
   return (
@@ -57,6 +59,16 @@ export function TeamPanel({ team, onRemove }: TeamPanelProps) {
             Équipe complète !
           </p>
         )}
+
+        <button
+          onClick={onUndo}
+          disabled={!canUndo}
+          className="mt-4 w-full text-sm py-2 rounded-lg font-medium transition-colors
+            disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed
+            bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-pointer"
+        >
+          ↩ Annuler
+        </button>
       </div>
     </aside>
   );
