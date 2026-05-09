@@ -4,9 +4,11 @@ import type { DecoratedPokemon } from "./decorator/pokemonDecorators";
 import AppConfig from "./config";
 import { PokemonApiAdapter } from "./adapter/PokemonApiAdapter";
 import { withPowerLevel, withLegendary } from "./decorator/pokemonDecorators";
+import { teamEvents } from "./observer/teamEvents";
 import { FilterBar } from "./components/FilterBar";
 import { PokemonList } from "./components/PokemonList";
 import { TeamPanel } from "./components/TeamPanel";
+import { Notification } from "./components/Notification";
 
 function App() {
   const [pokemons, setPokemons] = useState<DecoratedPokemon[]>([]);
@@ -25,7 +27,10 @@ function App() {
   }, []);
 
   function handleAdd(pokemon: DecoratedPokemon) {
-    if (team.length >= AppConfig.MAX_TEAM_SIZE) return;
+    if (team.length >= AppConfig.MAX_TEAM_SIZE) {
+      teamEvents.emit<string>("team:full", "Équipe complète ! Retirez un Pokémon pour en ajouter un autre.");
+      return;
+    }
     if (team.find((p) => p.id === pokemon.id)) return;
     setTeam([...team, pokemon]);
   }
@@ -70,6 +75,7 @@ function App() {
 
         <TeamPanel team={team} onRemove={handleRemove} />
       </main>
+      <Notification />
     </div>
   );
 }
